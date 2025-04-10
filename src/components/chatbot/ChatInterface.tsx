@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -85,28 +84,12 @@ const ChatInterface = ({ title = "LawLink Legal Assistant" }: ChatInterfaceProps
           });
         }
       } else {
-        // Check if there's debug info
-        const debug = data.debug || null;
-        
-        if (debug && import.meta.env.DEV) {
-          console.log("API Debug Info:", debug);
-          
-          // Show debug toast in development
-          if (debug.error) {
-            toast({
-              variant: "destructive",
-              title: `API Error: ${debug.error.type || "Unknown"}`,
-              description: debug.error.message || "Check console for details"
-            });
-          }
-        }
-        
-        // Add bot message with the AI response
+        // Add bot message with the response
         const botMessage: Message = {
           role: 'bot',
           content: data.response || "I'm sorry, I couldn't generate a response. Please try again.",
           timestamp: new Date(),
-          debug: debug
+          debug: data.debug || null
         };
         setMessages(prev => [...prev, botMessage]);
         
@@ -114,7 +97,7 @@ const ChatInterface = ({ title = "LawLink Legal Assistant" }: ChatInterfaceProps
         if (!data.success && import.meta.env.DEV) {
           toast({
             title: "Using fallback response",
-            description: "The AI service is currently unavailable. Using pre-defined fallback responses.",
+            description: "The AI service encountered an issue. Using keyword-based responses.",
           });
         }
       }
@@ -123,7 +106,7 @@ const ChatInterface = ({ title = "LawLink Legal Assistant" }: ChatInterfaceProps
       // Add error bot message
       const botErrorMessage: Message = {
         role: 'bot',
-        content: "I apologize for the inconvenience. Our service is currently experiencing high demand. Please try again shortly or consider scheduling a consultation with one of our lawyers.",
+        content: "I apologize for the inconvenience. Our service is currently experiencing technical issues. Please try again shortly or consider scheduling a consultation with one of our lawyers.",
         timestamp: new Date(),
         debug: err
       };

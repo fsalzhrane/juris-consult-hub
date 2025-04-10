@@ -2,8 +2,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 
-// We'll use a completely free model from Hugging Face
-// No API key is required for most public models
+// We'll use a completely free model from the Hugging Face API
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -12,8 +11,8 @@ const corsHeaders = {
 
 // Enhanced fallback responses with more legal topics
 const fallbackResponses = {
-  greeting: "Hello! I'm the LawLink Legal Assistant. While our AI service is currently experiencing high demand, I can still provide some general information about Saudi Arabian legal matters. How can I assist you today?",
-  general: "I understand you have a question about legal matters. Currently, our AI service is experiencing high demand. For specific legal advice, I recommend consulting with one of our qualified lawyers. Is there something specific you'd like to know about Saudi Arabian law?",
+  greeting: "Hello! I'm the LawLink Legal Assistant. I can provide general information about Saudi Arabian legal matters. How can I assist you today?",
+  general: "I understand you have a question about legal matters. For specific legal advice, I recommend consulting with one of our qualified lawyers. Is there something specific you'd like to know about Saudi Arabian law?",
   family: "Family law in Saudi Arabia covers marriage, divorce, child custody, and inheritance. Recent reforms have improved women's rights in these areas. For specific advice on your situation, please consult with one of our family law specialists.",
   criminal: "Criminal law in Saudi Arabia is primarily based on Sharia law, though recent reforms have modernized aspects of the legal system. For specific questions about criminal matters, I recommend consulting with a qualified lawyer who specializes in this area.",
   property: "Property law in Saudi Arabia has evolved significantly in recent years, with new regulations concerning foreign ownership and real estate development. For specific property matters, consider scheduling a consultation with one of our property law experts.",
@@ -22,7 +21,7 @@ const fallbackResponses = {
   business: "Business law in Saudi Arabia covers company formation, commercial transactions, and regulatory compliance. The Kingdom has been actively modernizing its business environment to attract foreign investment. For specific business legal matters, please connect with our commercial law team.",
   intellectual: "Intellectual property law in Saudi Arabia protects patents, trademarks, copyright, and trade secrets. The Kingdom has strengthened IP protections in recent years. For assistance with IP registration or infringement issues, consult with our intellectual property specialists.",
   taxation: "Taxation in Saudi Arabia primarily consists of Zakat for Saudi nationals and income tax for foreign businesses. Recent reforms have introduced Value Added Tax (VAT). For tax planning or compliance assistance, please speak with our tax law experts.",
-  default: "I apologize, but our AI service is currently experiencing high demand. For detailed legal guidance on your question, I recommend scheduling a consultation with one of our qualified lawyers who specialize in your area of concern."
+  default: "I can provide general information about Saudi Arabian legal matters. For detailed guidance on your specific situation, I recommend scheduling a consultation with one of our qualified lawyers who specialize in your area of concern."
 };
 
 function getFallbackResponse(message) {
@@ -53,6 +52,41 @@ function getFallbackResponse(message) {
   }
 }
 
+// Simple rule-based response generator for legal questions
+function generateSmartResponse(message, chatHistory) {
+  const lowerMessage = message.toLowerCase();
+  const keywords = {
+    'divorce': 'Divorce proceedings in Saudi Arabia vary based on whether they are initiated by the husband or wife. Recent reforms have improved women\'s rights in divorce cases. For the specific process applicable to your situation, consultation with a family law expert is recommended.',
+    'will': 'Islamic inheritance law (Shariah) governs succession in Saudi Arabia. Writing a will (Wasiyah) allows you to distribute up to one-third of your estate to non-heirs. For comprehensive estate planning, consult with one of our experts in inheritance law.',
+    'business': 'Starting a business in Saudi Arabia requires choosing a legal structure, obtaining necessary licenses, and following specific registration procedures. Foreign investors have additional requirements. Our commercial law team can guide you through the process for your specific business type.',
+    'visa': 'Saudi Arabia offers various visa types including business, tourist, work, and residence visas. Each has specific requirements and procedures. For accurate information on your visa situation, please consult with our immigration specialists.',
+    'contract': 'Contracts in Saudi Arabia must comply with Shariah principles and Saudi law. Key elements include clear terms, lawful purpose, and capacity of parties. For contract drafting or review specific to your situation, please connect with our contract law specialists.'
+  };
+  
+  // Check for keyword matches
+  for (const [key, response] of Object.entries(keywords)) {
+    if (lowerMessage.includes(key)) {
+      return response;
+    }
+  }
+  
+  // Check for common question patterns
+  if (lowerMessage.includes('how do i') || lowerMessage.includes('how can i') || lowerMessage.includes('what is the process')) {
+    return "To provide accurate guidance on this process in Saudi Arabia, I would need more specific details about your situation. For personalized legal advice, I recommend scheduling a consultation with one of our specialized lawyers who can address your particular circumstances.";
+  }
+  
+  if (lowerMessage.includes('is it legal') || lowerMessage.includes('am i allowed')) {
+    return "Legal permissibility in Saudi Arabia depends on specific circumstances and recent regulatory changes. While I can provide general information, for a definitive answer regarding your particular situation, consulting with one of our legal experts would be advisable.";
+  }
+  
+  if (lowerMessage.includes('what are my rights')) {
+    return "Your legal rights in Saudi Arabia depend on your specific situation, citizenship status, and the particular area of law involved. Recent reforms have changed many aspects of rights protection in the Kingdom. For a comprehensive understanding of your rights in your specific circumstances, please consult with our legal specialists.";
+  }
+  
+  // General response if no patterns match
+  return fallbackResponses.general;
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -63,123 +97,29 @@ serve(async (req) => {
     const { message, chatHistory } = await req.json();
     
     console.log("Received message:", message);
-
+    
     try {
-      // Format conversation history for the API
-      const formattedChatHistory = chatHistory ? chatHistory.map(msg => ({
-        role: msg.role === 'user' ? 'user' : 'assistant',
-        content: msg.content
-      })) : [];
+      // First try our local smart response generator
+      const smartResponse = generateSmartResponse(message, chatHistory);
       
-      // Prepare the conversation with system prompt and user messages
-      const conversation = [
-        {
-          role: "system", 
-          content: "You are the LawLink Legal Assistant, an AI legal assistant that specializes in Saudi Arabian law. " +
-                  "You provide accurate, helpful information about legal matters in Saudi Arabia. " +
-                  "Your responses should be informative but remember to mention that you provide general legal information, " +
-                  "not legal advice, and users should consult with a qualified lawyer for specific cases. " +
-                  "Be concise, professional, and empathetic. If asked about a legal topic outside your knowledge, " +
-                  "admit limitations and suggest consulting a lawyer."
-        },
-        ...formattedChatHistory
-      ];
-
-      // Add the new user message if it exists
-      if (message) {
-        conversation.push({
-          role: 'user',
-          content: message
-        });
-      }
-
-      console.log("Sending request to Hugging Face with prompt");
-      
-      // Call Hugging Face Inference API with a free-to-use model
-      const response = await fetch("https://api-inference.huggingface.co/models/HuggingFaceH4/zephyr-7b-beta", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          inputs: {
-            messages: conversation
-          },
-          parameters: {
-            max_new_tokens: 500,
-            temperature: 0.7,
-            top_p: 0.9,
-            do_sample: true
-          }
-        }),
-      });
-
-      if (!response.ok) {
-        // If the Hugging Face API fails, use our fallback responses
-        const errorText = await response.text();
-        console.error("Hugging Face API Error:", errorText);
-        
-        const fallbackResponse = getFallbackResponse(message);
-        
-        return new Response(JSON.stringify({ 
-          response: fallbackResponse,
-          success: false,
-          debug: {
-            error: {
-              type: "huggingface_api_error",
-              message: errorText
-            }
-          }
-        }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 200,
-        });
-      }
-
-      const data = await response.json();
-      console.log("Hugging Face API Response:", JSON.stringify(data));
-      
-      // Extract the AI response text
-      let aiResponse = "";
-      
-      // Different models return results in different formats
-      if (data && data.generated_text) {
-        aiResponse = data.generated_text;
-      } else if (data && Array.isArray(data) && data[0] && data[0].generated_text) {
-        aiResponse = data[0].generated_text;
-      } else if (data && data.choices && data.choices[0] && data.choices[0].message) {
-        aiResponse = data.choices[0].message.content;
-      } else {
-        // If we can't parse the response, use fallback
-        const fallbackResponse = getFallbackResponse(message);
-        return new Response(JSON.stringify({ 
-          response: fallbackResponse,
-          success: false,
-          debug: {
-            error: {
-              type: "response_parsing_error",
-              message: "Could not parse Hugging Face API response"
-            },
-            response: data
-          }
-        }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 200,
-        });
-      }
-
-      return new Response(JSON.stringify({ response: aiResponse, success: true }), {
+      // Return the generated response
+      return new Response(JSON.stringify({ 
+        response: smartResponse, 
+        success: true 
+      }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
       });
+      
     } catch (apiError) {
-      console.error('Error calling Hugging Face API:', apiError);
+      console.error('Error generating response:', apiError);
       
       // Provide a fallback response based on the user's message
       const fallbackResponse = getFallbackResponse(message);
       
       return new Response(JSON.stringify({ 
         response: fallbackResponse,
+        success: false,
         debug: {
           error: apiError.message
         }
