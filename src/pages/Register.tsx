@@ -7,7 +7,7 @@ const Register = () => {
   return (
     <Layout>
       <div className="py-12 md:py-20">
-        <AuthForm />
+        <AuthForm isLogin={false} />
       </div>
     </Layout>
   );

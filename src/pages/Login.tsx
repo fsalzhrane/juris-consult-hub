@@ -7,7 +7,7 @@ const Login = () => {
   return (
     <Layout>
       <div className="py-12 md:py-20">
-        <AuthForm />
+        <AuthForm isLogin={true} />
       </div>
     </Layout>
   );

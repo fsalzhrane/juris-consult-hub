@@ -2,10 +2,16 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { Menu, X, User, LogIn } from 'lucide-react';
+import { Menu, X, User, LogIn, Moon, Sun, Globe } from 'lucide-react';
+import { useTheme } from '@/contexts/ThemeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useTranslation } from '@/hooks/useTranslation';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { theme, toggleTheme } = useTheme();
+  const { toggleLanguage } = useLanguage();
+  const { t } = useTranslation();
 
   return (
     <nav className="bg-background/90 backdrop-blur-sm sticky top-0 z-50 w-full border-b">
@@ -22,32 +28,68 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-4">
-            <Link to="/" className="px-3 py-2 text-sm font-medium hover:text-legal-primary">Home</Link>
-            <Link to="/services" className="px-3 py-2 text-sm font-medium hover:text-legal-primary">Services</Link>
-            <Link to="/lawyers" className="px-3 py-2 text-sm font-medium hover:text-legal-primary">Lawyers</Link>
-            <Link to="/chatbot" className="px-3 py-2 text-sm font-medium hover:text-legal-primary">AI Assistant</Link>
-            <Link to="/about" className="px-3 py-2 text-sm font-medium hover:text-legal-primary">About</Link>
-            <Link to="/contact" className="px-3 py-2 text-sm font-medium hover:text-legal-primary">Contact</Link>
+            <Link to="/" className="px-3 py-2 text-sm font-medium hover:text-legal-primary">{t('nav.home')}</Link>
+            <Link to="/services" className="px-3 py-2 text-sm font-medium hover:text-legal-primary">{t('nav.services')}</Link>
+            <Link to="/lawyers" className="px-3 py-2 text-sm font-medium hover:text-legal-primary">{t('nav.lawyers')}</Link>
+            <Link to="/chatbot" className="px-3 py-2 text-sm font-medium hover:text-legal-primary">{t('nav.aiAssistant')}</Link>
+            <Link to="/about" className="px-3 py-2 text-sm font-medium hover:text-legal-primary">{t('nav.about')}</Link>
+            <Link to="/contact" className="px-3 py-2 text-sm font-medium hover:text-legal-primary">{t('nav.contact')}</Link>
             
             <div className="ml-4 flex items-center space-x-2">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={toggleTheme} 
+                className="rounded-full"
+              >
+                {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+              </Button>
+              
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={toggleLanguage} 
+                className="rounded-full"
+              >
+                <Globe className="h-5 w-5" />
+              </Button>
+              
               <Button variant="ghost" size="sm" asChild>
                 <Link to="/login" className="flex items-center space-x-1">
                   <LogIn className="h-4 w-4" />
-                  <span>Login</span>
+                  <span>{t('common.login')}</span>
                 </Link>
               </Button>
               
               <Button size="sm" className="bg-legal-primary hover:bg-legal-secondary" asChild>
                 <Link to="/register" className="flex items-center space-x-1">
                   <User className="h-4 w-4" />
-                  <span>Register</span>
+                  <span>{t('common.register')}</span>
                 </Link>
               </Button>
             </div>
           </div>
           
           {/* Mobile menu button */}
-          <div className="md:hidden flex items-center">
+          <div className="md:hidden flex items-center space-x-2">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={toggleTheme} 
+              className="rounded-full"
+            >
+              {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+            </Button>
+            
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={toggleLanguage} 
+              className="rounded-full"
+            >
+              <Globe className="h-5 w-5" />
+            </Button>
+            
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="inline-flex items-center justify-center p-2 rounded-md text-foreground hover:text-legal-primary focus:outline-none"
@@ -71,42 +113,42 @@ const Navbar = () => {
               className="block px-3 py-2 text-base font-medium hover:bg-legal-accent/20 rounded-md"
               onClick={() => setIsMenuOpen(false)}
             >
-              Home
+              {t('nav.home')}
             </Link>
             <Link 
               to="/services" 
               className="block px-3 py-2 text-base font-medium hover:bg-legal-accent/20 rounded-md"
               onClick={() => setIsMenuOpen(false)}
             >
-              Services
+              {t('nav.services')}
             </Link>
             <Link 
               to="/lawyers" 
               className="block px-3 py-2 text-base font-medium hover:bg-legal-accent/20 rounded-md"
               onClick={() => setIsMenuOpen(false)}
             >
-              Lawyers
+              {t('nav.lawyers')}
             </Link>
             <Link 
               to="/chatbot" 
               className="block px-3 py-2 text-base font-medium hover:bg-legal-accent/20 rounded-md"
               onClick={() => setIsMenuOpen(false)}
             >
-              AI Assistant
+              {t('nav.aiAssistant')}
             </Link>
             <Link 
               to="/about" 
               className="block px-3 py-2 text-base font-medium hover:bg-legal-accent/20 rounded-md"
               onClick={() => setIsMenuOpen(false)}
             >
-              About
+              {t('nav.about')}
             </Link>
             <Link 
               to="/contact" 
               className="block px-3 py-2 text-base font-medium hover:bg-legal-accent/20 rounded-md"
               onClick={() => setIsMenuOpen(false)}
             >
-              Contact
+              {t('nav.contact')}
             </Link>
             <div className="pt-4 pb-3 border-t border-border">
               <Link
@@ -114,14 +156,14 @@ const Navbar = () => {
                 className="block px-3 py-2 text-base font-medium hover:bg-legal-accent/20 rounded-md"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Login
+                {t('common.login')}
               </Link>
               <Link
                 to="/register"
                 className="block px-3 py-2 mt-1 text-base font-medium bg-legal-primary text-white rounded-md"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Register
+                {t('common.register')}
               </Link>
             </div>
           </div>
