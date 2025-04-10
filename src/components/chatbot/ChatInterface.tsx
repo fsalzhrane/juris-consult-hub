@@ -1,7 +1,6 @@
-
 import { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { Bot, Send, User, Info, CornerDownRight, Paperclip, FileText, Scales, Gavel } from 'lucide-react';
+import { Bot, Send, User, Info, CornerDownRight, Paperclip, FileText, Gavel, Scale } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -123,7 +122,7 @@ const ChatInterface = ({ title = "LawLink Legal Assistant" }: ChatInterfaceProps
 
   // Quick topic suggestions
   const quickTopics = [
-    { icon: <Scales className="h-4 w-4 mr-1" />, text: "Family Law" },
+    { icon: <Scale className="h-4 w-4 mr-1" />, text: "Family Law" },
     { icon: <FileText className="h-4 w-4 mr-1" />, text: "Contracts" },
     { icon: <Gavel className="h-4 w-4 mr-1" />, text: "Criminal Law" },
     { icon: <Paperclip className="h-4 w-4 mr-1" />, text: "Property Law" },
