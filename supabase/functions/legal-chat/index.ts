@@ -2,7 +2,8 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 
-const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+// We'll use a completely free model from Hugging Face
+// No API key is required for most public models
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -60,102 +61,74 @@ serve(async (req) => {
 
   try {
     const { message, chatHistory } = await req.json();
-
-    // Check if OpenAI API key is available or if we should use fallback immediately
-    if (!openAIApiKey) {
-      console.log("OpenAI API key is not configured. Using fallback response.");
-      const fallbackResponse = getFallbackResponse(message);
-      return new Response(JSON.stringify({ response: fallbackResponse }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
-      });
-    }
-
-    // Log key information for debugging (masking most of the key)
-    if (openAIApiKey) {
-      const maskedKey = openAIApiKey.substring(0, 3) + "..." + openAIApiKey.substring(openAIApiKey.length - 4);
-      console.log(`Using OpenAI API key starting with ${maskedKey}`);
-    }
-
-    // Prepare conversation history for OpenAI
-    const messages = [];
     
-    // Add system message to set the context for the AI
-    messages.push({
-      role: "system", 
-      content: "You are the LawLink Legal Assistant, an AI legal assistant that specializes in Saudi Arabian law. " +
-               "You provide accurate, helpful information about legal matters in Saudi Arabia. " +
-               "Your responses should be informative but remember to mention that you provide general legal information, " +
-               "not legal advice, and users should consult with a qualified lawyer for specific cases. " +
-               "Be concise, professional, and empathetic. If asked about a legal topic outside your knowledge, " +
-               "admit limitations and suggest consulting a lawyer."
-    });
-
-    // Add chat history
-    if (chatHistory && chatHistory.length > 0) {
-      for (const chat of chatHistory) {
-        messages.push({
-          role: chat.role === 'user' ? 'user' : 'assistant',
-          content: chat.content
-        });
-      }
-    }
-
-    // Add the new user message
-    if (message) {
-      messages.push({
-        role: 'user',
-        content: message
-      });
-    }
-
-    console.log("Sending request to OpenAI with messages:", JSON.stringify(messages.slice(0, 1)));
+    console.log("Received message:", message);
 
     try {
-      // Call OpenAI API
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
+      // Format conversation history for the API
+      const formattedChatHistory = chatHistory ? chatHistory.map(msg => ({
+        role: msg.role === 'user' ? 'user' : 'assistant',
+        content: msg.content
+      })) : [];
+      
+      // Prepare the conversation with system prompt and user messages
+      const conversation = [
+        {
+          role: "system", 
+          content: "You are the LawLink Legal Assistant, an AI legal assistant that specializes in Saudi Arabian law. " +
+                  "You provide accurate, helpful information about legal matters in Saudi Arabia. " +
+                  "Your responses should be informative but remember to mention that you provide general legal information, " +
+                  "not legal advice, and users should consult with a qualified lawyer for specific cases. " +
+                  "Be concise, professional, and empathetic. If asked about a legal topic outside your knowledge, " +
+                  "admit limitations and suggest consulting a lawyer."
+        },
+        ...formattedChatHistory
+      ];
+
+      // Add the new user message if it exists
+      if (message) {
+        conversation.push({
+          role: 'user',
+          content: message
+        });
+      }
+
+      console.log("Sending request to Hugging Face with prompt");
+      
+      // Call Hugging Face Inference API with a free-to-use model
+      const response = await fetch("https://api-inference.huggingface.co/models/HuggingFaceH4/zephyr-7b-beta", {
+        method: "POST",
         headers: {
-          'Authorization': `Bearer ${openAIApiKey}`,
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: messages,
-          temperature: 0.7,
-          max_tokens: 500,
+          inputs: {
+            messages: conversation
+          },
+          parameters: {
+            max_new_tokens: 500,
+            temperature: 0.7,
+            top_p: 0.9,
+            do_sample: true
+          }
         }),
       });
 
-      // Check if the response is not ok
       if (!response.ok) {
-        const errorData = await response.json();
-        console.error('OpenAI API Error:', JSON.stringify(errorData));
+        // If the Hugging Face API fails, use our fallback responses
+        const errorText = await response.text();
+        console.error("Hugging Face API Error:", errorText);
         
-        // Check specifically for quota error
-        if (errorData.error) {
-          console.log(`OpenAI API error code: ${errorData.error.code}, type: ${errorData.error.type}`);
-          
-          if (errorData.error.code === "insufficient_quota") {
-            console.log("OpenAI API quota exceeded. Using enhanced fallback response.");
-          } else if (errorData.error.type === "invalid_request_error") {
-            console.log("Invalid request to OpenAI API. Check API key validity.");
-          } else if (errorData.error.type === "authentication_error") {
-            console.log("Authentication error. The API key may be invalid or revoked.");
-          }
-        }
-        
-        // Provide a fallback response based on the user's message
         const fallbackResponse = getFallbackResponse(message);
         
         return new Response(JSON.stringify({ 
           response: fallbackResponse,
+          success: false,
           debug: {
-            error: errorData.error ? {
-              type: errorData.error.type,
-              code: errorData.error.code,
-              message: errorData.error.message
-            } : "Unknown error"
+            error: {
+              type: "huggingface_api_error",
+              message: errorText
+            }
           }
         }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -164,14 +137,43 @@ serve(async (req) => {
       }
 
       const data = await response.json();
-      const aiResponse = data.choices[0].message.content;
+      console.log("Hugging Face API Response:", JSON.stringify(data));
+      
+      // Extract the AI response text
+      let aiResponse = "";
+      
+      // Different models return results in different formats
+      if (data && data.generated_text) {
+        aiResponse = data.generated_text;
+      } else if (data && Array.isArray(data) && data[0] && data[0].generated_text) {
+        aiResponse = data[0].generated_text;
+      } else if (data && data.choices && data.choices[0] && data.choices[0].message) {
+        aiResponse = data.choices[0].message.content;
+      } else {
+        // If we can't parse the response, use fallback
+        const fallbackResponse = getFallbackResponse(message);
+        return new Response(JSON.stringify({ 
+          response: fallbackResponse,
+          success: false,
+          debug: {
+            error: {
+              type: "response_parsing_error",
+              message: "Could not parse Hugging Face API response"
+            },
+            response: data
+          }
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
+        });
+      }
 
       return new Response(JSON.stringify({ response: aiResponse, success: true }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
       });
     } catch (apiError) {
-      console.error('Error calling OpenAI API:', apiError);
+      console.error('Error calling Hugging Face API:', apiError);
       
       // Provide a fallback response based on the user's message
       const fallbackResponse = getFallbackResponse(message);

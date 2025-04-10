@@ -95,7 +95,7 @@ const ChatInterface = ({ title = "LawLink Legal Assistant" }: ChatInterfaceProps
           if (debug.error) {
             toast({
               variant: "destructive",
-              title: `OpenAI API Error: ${debug.error.type || "Unknown"}`,
+              title: `API Error: ${debug.error.type || "Unknown"}`,
               description: debug.error.message || "Check console for details"
             });
           }
