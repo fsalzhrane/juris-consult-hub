@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,16 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				legal: {
+					'primary': '#7E69AB',
+					'secondary': '#6E59A5',
+					'accent': '#D6BCFA',
+					'brown': '#8B7355',
+					'brown-light': '#A89078',
+					'brown-dark': '#6A563D',
+					'gray': '#8E9196',
+					'dark': '#1A1F2C'
 				}
 			},
 			borderRadius: {
@@ -84,12 +95,37 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'fade-in': {
+					from: {
+						opacity: '0'
+					},
+					to: {
+						opacity: '1'
+					}
+				},
+				'slide-up': {
+					from: {
+						transform: 'translateY(10px)',
+						opacity: '0'
+					},
+					to: {
+						transform: 'translateY(0)',
+						opacity: '1'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
-			}
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'fade-in': 'fade-in 0.3s ease-out forwards',
+				'slide-up': 'slide-up 0.4s ease-out forwards'
+			},
+			backgroundImage: {
+				'gradient-legal': 'linear-gradient(135deg, #7E69AB 0%, #6E59A5 100%)',
+				'gradient-brown': 'linear-gradient(135deg, #8B7355 0%, #6A563D 100%)',
+				'hero-pattern': 'linear-gradient(rgba(26, 31, 44, 0.8), rgba(26, 31, 44, 0.8)), url("/hero-background.jpg")'
+			},
 		}
 	},
 	plugins: [require("tailwindcss-animate")],
