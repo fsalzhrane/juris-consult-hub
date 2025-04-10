@@ -13,6 +13,7 @@ interface Message {
   role: 'user' | 'bot';
   content: string;
   timestamp: Date;
+  debug?: any;
 }
 
 interface ChatInterfaceProps {
@@ -51,6 +52,8 @@ const ChatInterface = ({ title = "LawLink Legal Assistant" }: ChatInterfaceProps
         content: msg.content
       }));
 
+      console.log("Calling legal-chat function with message:", inputValue);
+      
       // Call the Supabase edge function
       const { data, error } = await supabase.functions.invoke('legal-chat', {
         body: {
@@ -59,6 +62,8 @@ const ChatInterface = ({ title = "LawLink Legal Assistant" }: ChatInterfaceProps
         }
       });
 
+      console.log("Legal-chat function response:", data);
+
       if (error) {
         console.error("Error calling legal-chat function:", error);
         
@@ -66,17 +71,52 @@ const ChatInterface = ({ title = "LawLink Legal Assistant" }: ChatInterfaceProps
         const botErrorMessage: Message = {
           role: 'bot',
           content: "I'm currently experiencing technical difficulties. Please try again in a moment, or consider contacting one of our lawyers directly for immediate assistance.",
-          timestamp: new Date()
+          timestamp: new Date(),
+          debug: error
         };
         setMessages(prev => [...prev, botErrorMessage]);
+        
+        // Show error toast in development
+        if (import.meta.env.DEV) {
+          toast({
+            variant: "destructive",
+            title: "API Error",
+            description: error.message || "Error calling legal-chat function"
+          });
+        }
       } else {
+        // Check if there's debug info
+        const debug = data.debug || null;
+        
+        if (debug && import.meta.env.DEV) {
+          console.log("API Debug Info:", debug);
+          
+          // Show debug toast in development
+          if (debug.error) {
+            toast({
+              variant: "destructive",
+              title: `OpenAI API Error: ${debug.error.type || "Unknown"}`,
+              description: debug.error.message || "Check console for details"
+            });
+          }
+        }
+        
         // Add bot message with the AI response
         const botMessage: Message = {
           role: 'bot',
           content: data.response || "I'm sorry, I couldn't generate a response. Please try again.",
-          timestamp: new Date()
+          timestamp: new Date(),
+          debug: debug
         };
         setMessages(prev => [...prev, botMessage]);
+        
+        // If not successful but we got a fallback response
+        if (!data.success && import.meta.env.DEV) {
+          toast({
+            title: "Using fallback response",
+            description: "The AI service is currently unavailable. Using pre-defined fallback responses.",
+          });
+        }
       }
     } catch (err) {
       console.error("Exception in chat submission:", err);
@@ -84,7 +124,8 @@ const ChatInterface = ({ title = "LawLink Legal Assistant" }: ChatInterfaceProps
       const botErrorMessage: Message = {
         role: 'bot',
         content: "I apologize for the inconvenience. Our service is currently experiencing high demand. Please try again shortly or consider scheduling a consultation with one of our lawyers.",
-        timestamp: new Date()
+        timestamp: new Date(),
+        debug: err
       };
       setMessages(prev => [...prev, botErrorMessage]);
     } finally {

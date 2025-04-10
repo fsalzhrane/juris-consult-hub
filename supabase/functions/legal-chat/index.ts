@@ -71,6 +71,12 @@ serve(async (req) => {
       });
     }
 
+    // Log key information for debugging (masking most of the key)
+    if (openAIApiKey) {
+      const maskedKey = openAIApiKey.substring(0, 3) + "..." + openAIApiKey.substring(openAIApiKey.length - 4);
+      console.log(`Using OpenAI API key starting with ${maskedKey}`);
+    }
+
     // Prepare conversation history for OpenAI
     const messages = [];
     
@@ -103,7 +109,7 @@ serve(async (req) => {
       });
     }
 
-    console.log("Sending request to OpenAI with messages:", messages);
+    console.log("Sending request to OpenAI with messages:", JSON.stringify(messages.slice(0, 1)));
 
     try {
       // Call OpenAI API
@@ -124,17 +130,34 @@ serve(async (req) => {
       // Check if the response is not ok
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('OpenAI API Error:', errorData);
+        console.error('OpenAI API Error:', JSON.stringify(errorData));
         
         // Check specifically for quota error
-        if (errorData.error && errorData.error.code === "insufficient_quota") {
-          console.log("OpenAI API quota exceeded. Using enhanced fallback response.");
+        if (errorData.error) {
+          console.log(`OpenAI API error code: ${errorData.error.code}, type: ${errorData.error.type}`);
+          
+          if (errorData.error.code === "insufficient_quota") {
+            console.log("OpenAI API quota exceeded. Using enhanced fallback response.");
+          } else if (errorData.error.type === "invalid_request_error") {
+            console.log("Invalid request to OpenAI API. Check API key validity.");
+          } else if (errorData.error.type === "authentication_error") {
+            console.log("Authentication error. The API key may be invalid or revoked.");
+          }
         }
         
         // Provide a fallback response based on the user's message
         const fallbackResponse = getFallbackResponse(message);
         
-        return new Response(JSON.stringify({ response: fallbackResponse }), {
+        return new Response(JSON.stringify({ 
+          response: fallbackResponse,
+          debug: {
+            error: errorData.error ? {
+              type: errorData.error.type,
+              code: errorData.error.code,
+              message: errorData.error.message
+            } : "Unknown error"
+          }
+        }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 200,
         });
@@ -143,7 +166,7 @@ serve(async (req) => {
       const data = await response.json();
       const aiResponse = data.choices[0].message.content;
 
-      return new Response(JSON.stringify({ response: aiResponse }), {
+      return new Response(JSON.stringify({ response: aiResponse, success: true }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
       });
@@ -153,7 +176,12 @@ serve(async (req) => {
       // Provide a fallback response based on the user's message
       const fallbackResponse = getFallbackResponse(message);
       
-      return new Response(JSON.stringify({ response: fallbackResponse }), {
+      return new Response(JSON.stringify({ 
+        response: fallbackResponse,
+        debug: {
+          error: apiError.message
+        }
+      }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
       });
