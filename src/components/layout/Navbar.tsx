@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Menu, X, User, LogIn, Moon, Sun, Globe } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -12,6 +12,7 @@ const Navbar = () => {
   const { theme, toggleTheme } = useTheme();
   const { toggleLanguage } = useLanguage();
   const { t } = useTranslation();
+  const location = useLocation();
 
   return (
     <nav className="bg-background/90 backdrop-blur-sm sticky top-0 z-50 w-full border-b">
@@ -20,20 +21,50 @@ const Navbar = () => {
           <div className="flex-shrink-0 flex items-center">
             <Link to="/" className="flex items-center space-x-2">
               <div className="w-8 h-8 rounded-full bg-gradient-legal flex items-center justify-center">
-                <span className="text-white font-bold text-lg">J</span>
+                <span className="text-white font-bold text-lg">L</span>
               </div>
-              <span className="font-bold text-xl gradient-text">JurisConsult</span>
+              <span className="font-bold text-xl gradient-text">LawLink</span>
             </Link>
           </div>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-4">
-            <Link to="/" className="px-3 py-2 text-sm font-medium hover:text-legal-primary">{t('nav.home')}</Link>
-            <Link to="/services" className="px-3 py-2 text-sm font-medium hover:text-legal-primary">{t('nav.services')}</Link>
-            <Link to="/lawyers" className="px-3 py-2 text-sm font-medium hover:text-legal-primary">{t('nav.lawyers')}</Link>
-            <Link to="/chatbot" className="px-3 py-2 text-sm font-medium hover:text-legal-primary">{t('nav.aiAssistant')}</Link>
-            <Link to="/about" className="px-3 py-2 text-sm font-medium hover:text-legal-primary">{t('nav.about')}</Link>
-            <Link to="/contact" className="px-3 py-2 text-sm font-medium hover:text-legal-primary">{t('nav.contact')}</Link>
+            <Link 
+              to="/" 
+              className={`px-3 py-2 text-sm font-medium border-b-2 ${location.pathname === '/' ? 'border-legal-primary text-legal-primary' : 'border-transparent hover:text-legal-primary hover:border-legal-primary/50'}`}
+            >
+              {t('nav.home')}
+            </Link>
+            <Link 
+              to="/services" 
+              className={`px-3 py-2 text-sm font-medium border-b-2 ${location.pathname === '/services' ? 'border-legal-primary text-legal-primary' : 'border-transparent hover:text-legal-primary hover:border-legal-primary/50'}`}
+            >
+              {t('nav.services')}
+            </Link>
+            <Link 
+              to="/lawyers" 
+              className={`px-3 py-2 text-sm font-medium border-b-2 ${location.pathname === '/lawyers' ? 'border-legal-primary text-legal-primary' : 'border-transparent hover:text-legal-primary hover:border-legal-primary/50'}`}
+            >
+              {t('nav.lawyers')}
+            </Link>
+            <Link 
+              to="/chatbot" 
+              className={`px-3 py-2 text-sm font-medium border-b-2 ${location.pathname === '/chatbot' ? 'border-legal-primary text-legal-primary' : 'border-transparent hover:text-legal-primary hover:border-legal-primary/50'}`}
+            >
+              {t('nav.aiAssistant')}
+            </Link>
+            <Link 
+              to="/about" 
+              className={`px-3 py-2 text-sm font-medium border-b-2 ${location.pathname === '/about' ? 'border-legal-primary text-legal-primary' : 'border-transparent hover:text-legal-primary hover:border-legal-primary/50'}`}
+            >
+              {t('nav.about')}
+            </Link>
+            <Link 
+              to="/contact" 
+              className={`px-3 py-2 text-sm font-medium border-b-2 ${location.pathname === '/contact' ? 'border-legal-primary text-legal-primary' : 'border-transparent hover:text-legal-primary hover:border-legal-primary/50'}`}
+            >
+              {t('nav.contact')}
+            </Link>
             
             <div className="ml-4 flex items-center space-x-2">
               <Button 
@@ -110,42 +141,42 @@ const Navbar = () => {
           <div className="px-2 pt-2 pb-3 space-y-1">
             <Link 
               to="/" 
-              className="block px-3 py-2 text-base font-medium hover:bg-legal-accent/20 rounded-md"
+              className={`block px-3 py-2 text-base font-medium rounded-md ${location.pathname === '/' ? 'bg-legal-accent/20 text-legal-primary' : 'hover:bg-legal-accent/20'}`}
               onClick={() => setIsMenuOpen(false)}
             >
               {t('nav.home')}
             </Link>
             <Link 
               to="/services" 
-              className="block px-3 py-2 text-base font-medium hover:bg-legal-accent/20 rounded-md"
+              className={`block px-3 py-2 text-base font-medium rounded-md ${location.pathname === '/services' ? 'bg-legal-accent/20 text-legal-primary' : 'hover:bg-legal-accent/20'}`}
               onClick={() => setIsMenuOpen(false)}
             >
               {t('nav.services')}
             </Link>
             <Link 
               to="/lawyers" 
-              className="block px-3 py-2 text-base font-medium hover:bg-legal-accent/20 rounded-md"
+              className={`block px-3 py-2 text-base font-medium rounded-md ${location.pathname === '/lawyers' ? 'bg-legal-accent/20 text-legal-primary' : 'hover:bg-legal-accent/20'}`}
               onClick={() => setIsMenuOpen(false)}
             >
               {t('nav.lawyers')}
             </Link>
             <Link 
               to="/chatbot" 
-              className="block px-3 py-2 text-base font-medium hover:bg-legal-accent/20 rounded-md"
+              className={`block px-3 py-2 text-base font-medium rounded-md ${location.pathname === '/chatbot' ? 'bg-legal-accent/20 text-legal-primary' : 'hover:bg-legal-accent/20'}`}
               onClick={() => setIsMenuOpen(false)}
             >
               {t('nav.aiAssistant')}
             </Link>
             <Link 
               to="/about" 
-              className="block px-3 py-2 text-base font-medium hover:bg-legal-accent/20 rounded-md"
+              className={`block px-3 py-2 text-base font-medium rounded-md ${location.pathname === '/about' ? 'bg-legal-accent/20 text-legal-primary' : 'hover:bg-legal-accent/20'}`}
               onClick={() => setIsMenuOpen(false)}
             >
               {t('nav.about')}
             </Link>
             <Link 
               to="/contact" 
-              className="block px-3 py-2 text-base font-medium hover:bg-legal-accent/20 rounded-md"
+              className={`block px-3 py-2 text-base font-medium rounded-md ${location.pathname === '/contact' ? 'bg-legal-accent/20 text-legal-primary' : 'hover:bg-legal-accent/20'}`}
               onClick={() => setIsMenuOpen(false)}
             >
               {t('nav.contact')}

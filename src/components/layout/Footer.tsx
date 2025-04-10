@@ -22,9 +22,9 @@ const Footer = () => {
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8 rounded-full bg-gradient-legal flex items-center justify-center">
-                <span className="text-white font-bold text-lg">J</span>
+                <span className="text-white font-bold text-lg">L</span>
               </div>
-              <span className="font-bold text-xl text-white">JurisConsult</span>
+              <span className="font-bold text-xl text-white">LawLink</span>
             </div>
             <p className="text-sm text-gray-300">
               Connecting clients with top legal professionals. Get expert legal advice and consultation services.
@@ -59,10 +59,10 @@ const Footer = () => {
                 <Link to="/chatbot" className="text-gray-300 hover:text-white">AI Legal Assistant</Link>
               </li>
               <li>
-                <Link to="/faq" className="text-gray-300 hover:text-white">FAQ</Link>
+                <Link to="/about" className="text-gray-300 hover:text-white">About Us</Link>
               </li>
               <li>
-                <Link to="/about" className="text-gray-300 hover:text-white">About Us</Link>
+                <Link to="/contact" className="text-gray-300 hover:text-white">Contact</Link>
               </li>
             </ul>
           </div>
@@ -92,24 +92,24 @@ const Footer = () => {
             <ul className="space-y-3 text-sm">
               <li className="flex items-center space-x-2">
                 <MapPin className="h-4 w-4 text-legal-primary" />
-                <span className="text-gray-300">123 Legal Street, City, Country</span>
+                <span className="text-gray-300">Saudi Arabia, Jeddah, Al Manar Street</span>
               </li>
               <li className="flex items-center space-x-2">
                 <Phone className="h-4 w-4 text-legal-primary" />
-                <span className="text-gray-300">+1 234 567 890</span>
+                <span className="text-gray-300">0545128183</span>
               </li>
               <li className="flex items-center space-x-2">
                 <Mail className="h-4 w-4 text-legal-primary" />
-                <span className="text-gray-300">contact@jurisconsult.com</span>
+                <span className="text-gray-300">fsalzhrane@gmail.com</span>
               </li>
             </ul>
           </div>
         </div>
 
         <div className="border-t border-gray-700 mt-8 pt-6 text-center text-sm text-gray-400">
-          <p>© {currentYear} JurisConsult. All rights reserved.</p>
+          <p>© {currentYear} LawLink. All rights reserved.</p>
           <p className="mt-1">
-            Designed and developed for enhanced legal consultations.
+            Designed and developed by KAU students for enhanced legal consultations.
           </p>
         </div>
       </div>

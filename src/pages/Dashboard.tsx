@@ -1,52 +1,31 @@
 
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import * as React from 'react';
 import Layout from '@/components/layout/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { supabase } from '@/integrations/supabase/client';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
+import { LogOut } from 'lucide-react';
 
 const Dashboard = () => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
   const { t } = useTranslation();
 
-  useEffect(() => {
-    const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        navigate('/login');
-        return;
-      }
-      
-      setUser(session.user);
-      setLoading(false);
-    };
-
-    checkUser();
-  }, [navigate]);
-
-  if (loading) {
-    return (
-      <Layout>
-        <div className="py-12 md:py-20">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center">
-              <p>Loading...</p>
-            </div>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
+  const handleSignOut = async () => {
+    await signOut();
+  };
 
   return (
     <Layout>
       <div className="py-12 md:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold mb-8">{t('dashboard.welcomeBack')}, {user?.user_metadata?.full_name || user?.email}</h1>
+          <div className="flex justify-between items-center mb-8">
+            <h1 className="text-3xl font-bold">{t('dashboard.welcomeBack')}, {user?.user_metadata?.full_name || user?.email}</h1>
+            <Button variant="outline" onClick={handleSignOut} className="flex items-center gap-2">
+              <LogOut size={16} />
+              {t('common.logout')}
+            </Button>
+          </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <Card>
