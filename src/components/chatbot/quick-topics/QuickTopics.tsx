@@ -1,5 +1,5 @@
 
-import { Scale, FileText, Gavel, Paperclip } from 'lucide-react';
+import { Scale, FileText, Gavel, Paperclip, Briefcase, Building2, Award, Receipt } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 
 interface QuickTopicsProps {
@@ -12,6 +12,10 @@ const QuickTopics = ({ onSelectTopic }: QuickTopicsProps) => {
     { icon: <FileText className="h-4 w-4 mr-1" />, text: "Contracts" },
     { icon: <Gavel className="h-4 w-4 mr-1" />, text: "Criminal Law" },
     { icon: <Paperclip className="h-4 w-4 mr-1" />, text: "Property Law" },
+    { icon: <Briefcase className="h-4 w-4 mr-1" />, text: "Employment Law" },
+    { icon: <Building2 className="h-4 w-4 mr-1" />, text: "Business Law" },
+    { icon: <Award className="h-4 w-4 mr-1" />, text: "Intellectual Property" },
+    { icon: <Receipt className="h-4 w-4 mr-1" />, text: "Taxation" },
   ];
 
   return (
