@@ -1,4 +1,5 @@
 
+import React from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import translations from '@/translations';
 
@@ -15,7 +16,7 @@ export const useTranslation = () => {
   const t = (key: string): string => {
     // Split key by dots to access nested translations
     const keys = key.split('.');
-    let result = { ...currentTranslations };
+    let result: any = { ...currentTranslations };
 
     for (const k of keys) {
       if (result[k] === undefined) {
@@ -25,7 +26,8 @@ export const useTranslation = () => {
       result = result[k];
     }
 
-    return result;
+    // Ensure we return a string
+    return String(result);
   };
 
   return { t };
