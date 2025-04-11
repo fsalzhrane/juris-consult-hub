@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -15,6 +14,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { supabase } from "@/integrations/supabase/client";
 
 const ContactPage = () => {
   const { t } = useTranslation();
@@ -32,19 +32,37 @@ const ContactPage = () => {
     setFormData({ ...formData, [id]: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Simulate form submission
-    setTimeout(() => {
+    try {
+      // Insert message into the contact_messages table
+      const { error } = await supabase
+        .from('contact_messages')
+        .insert([formData]);
+      
+      if (error) {
+        throw error;
+      }
+      
       toast({
         title: "Message sent!",
         description: "We'll get back to you as soon as possible.",
       });
+      
+      // Clear the form after successful submission
       setFormData({ name: '', email: '', subject: '', message: '' });
+    } catch (error) {
+      console.error('Error submitting contact form:', error);
+      toast({
+        title: "Error sending message",
+        description: "There was a problem sending your message. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
       setIsSubmitting(false);
-    }, 1000);
+    }
   };
 
   const faqs = [
