@@ -69,16 +69,11 @@ const ChatInterface = ({ title = "LawLink Legal Assistant" }: ChatInterfaceProps
 
       if (error) {
         console.error("Error calling legal-chat function:", error);
-        toast({
-          title: "Error",
-          description: "Failed to get response from the assistant. Please try again.",
-          variant: "destructive"
-        });
-
-        // Add error bot message
+        
+        // Add error bot message with a user-friendly response
         const botErrorMessage: Message = {
           role: 'bot',
-          content: "I'm sorry, I encountered an error processing your request. Please try again later.",
+          content: "I'm currently experiencing technical difficulties. Please try again in a moment, or consider contacting one of our lawyers directly for immediate assistance.",
           timestamp: new Date()
         };
         setMessages(prev => [...prev, botErrorMessage]);
@@ -96,7 +91,7 @@ const ChatInterface = ({ title = "LawLink Legal Assistant" }: ChatInterfaceProps
       // Add error bot message
       const botErrorMessage: Message = {
         role: 'bot',
-        content: "I'm sorry, an unexpected error occurred. Please try again later.",
+        content: "I apologize for the inconvenience. Our service is currently experiencing high demand. Please try again shortly or consider scheduling a consultation with one of our lawyers.",
         timestamp: new Date()
       };
       setMessages(prev => [...prev, botErrorMessage]);
