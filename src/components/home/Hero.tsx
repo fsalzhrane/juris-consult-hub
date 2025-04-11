@@ -1,12 +1,9 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ArrowRight, MessageSquare, Calendar, Shield } from "lucide-react";
-
 const Hero = () => {
-  return (
-    <section className="relative bg-gradient-to-br from-legal-dark to-legal-dark/90 text-white py-20 md:py-32 overflow-hidden">
+  return <section className="relative bg-gradient-to-br from-legal-dark to-legal-dark/90 text-white py-20 md:py-32 overflow-hidden">
       {/* Background shapes/pattern */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
         <div className="absolute top-20 left-10 w-72 h-72 rounded-full bg-legal-primary/10 blur-3xl"></div>
@@ -33,7 +30,7 @@ const Hero = () => {
                 </Link>
               </Button>
               <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10" asChild>
-                <Link to="/chatbot">
+                <Link to="/chatbot" className="Change text color\n">
                   Try AI Assistant
                   <MessageSquare className="ml-2 h-4 w-4" />
                 </Link>
@@ -94,8 +91,6 @@ const Hero = () => {
           </div>
         </div>
       </div>
-    </section>
-  );
+    </section>;
 };
-
 export default Hero;
