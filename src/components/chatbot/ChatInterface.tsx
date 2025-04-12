@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Bot, Send, User, Info, CornerDownRight, Paperclip, FileText, Gavel, Scale } from 'lucide-react';
@@ -90,56 +91,43 @@ const ChatInterface = ({
         content: msg.content
       }));
 
-      // Call directly to the fallback response function instead of the edge function
-      // This ensures we always get a response, even if the edge function is not working
-      let botResponse;
-      
-      try {
-        // First try the edge function
-        const { data, error } = await supabase.functions.invoke('legal-chat', {
-          body: {
-            message: userMessage.content,
-            chatHistory: chatHistory,
-            chatbotId: chatbotId
-          }
-        });
-
-        if (error) {
-          console.error("Error calling legal-chat function:", error);
-          throw error;
+      // Call the edge function
+      const { data, error } = await supabase.functions.invoke('legal-chat', {
+        body: {
+          message: userMessage.content,
+          chatHistory: chatHistory,
+          chatbotId: chatbotId
         }
+      });
 
-        botResponse = data.response;
-      } catch (error) {
-        console.error("Exception in chat submission:", error);
-        
-        // Fallback responses if the edge function fails
-        if (userMessage.content.toLowerCase().includes('hello') || userMessage.content.toLowerCase().includes('hi ')) {
-          botResponse = "Hello! I'm the Awan LLM Legal Assistant. I can provide general legal information about Saudi Arabian law. How can I help you today?";
-        } else if (userMessage.content.toLowerCase().includes('family')) {
-          botResponse = "Family law in Saudi Arabia covers marriage, divorce, child custody, and inheritance. Recent reforms have improved women's rights in these areas. For specific advice, you should consult with a qualified family law specialist.";
-        } else {
-          botResponse = "I understand you have a question about legal matters. I can provide general information about Saudi Arabian law. What specific legal area are you interested in?";
-        }
+      if (error) {
+        console.error("Error calling legal-chat function:", error);
+        throw error;
       }
 
       // Add bot message with the response
       const botMessage: Message = {
         role: 'bot',
-        content: botResponse || "I apologize for the technical difficulties. Please try asking another question about Saudi Arabian law.",
+        content: data.response || "I apologize, but I couldn't process your request at the moment.",
         timestamp: new Date()
       };
       
       setMessages(prev => [...prev, botMessage]);
     } catch (err) {
-      console.error("General exception in chat handling:", err);
-      // Add error bot message as absolute fallback
+      console.error("Error in chat handling:", err);
+      // Add error bot message
       const botErrorMessage: Message = {
         role: 'bot',
-        content: "I'm here to help with legal questions about Saudi Arabian law. Could you please rephrase your question?",
+        content: "I apologize for the technical difficulties. Please try again or consult with one of our lawyers for immediate assistance.",
         timestamp: new Date()
       };
       setMessages(prev => [...prev, botErrorMessage]);
+      
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to get a response. Please try again later."
+      });
     } finally {
       setIsLoading(false);
     }
