@@ -15,13 +15,20 @@ interface Message {
 
 interface ChatInterfaceProps {
   title?: string;
+  chatbotId?: string;
 }
 
-const ChatInterface = ({ title = "LawLink Legal Assistant" }: ChatInterfaceProps) => {
+// Default Awan LLM chatbot ID
+const DEFAULT_CHATBOT_ID = "bcfe4778-79cd-4e9a-8bf5-8e67eda1cf39";
+
+const ChatInterface = ({ 
+  title = "Awan LLM Legal Assistant",
+  chatbotId = DEFAULT_CHATBOT_ID
+}: ChatInterfaceProps) => {
   const [messages, setMessages] = useState<Message[]>([
     { 
       role: 'bot', 
-      content: "Hello! I'm the LawLink Legal Assistant. I can provide general legal information and guidance. What legal matter can I help you with today?",
+      content: "Hello! I'm the Awan LLM Legal Assistant. I can provide general legal information and guidance. What legal matter can I help you with today?",
       timestamp: new Date()
     }
   ]);
@@ -35,6 +42,31 @@ const ChatInterface = ({ title = "LawLink Legal Assistant" }: ChatInterfaceProps
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+  
+  // Save messages to Supabase when they change
+  useEffect(() => {
+    const saveMessageToDb = async (message: Message) => {
+      try {
+        await supabase
+          .from('chat_messages')
+          .insert({
+            content: message.content,
+            role: message.role,
+            chatbot_id: chatbotId,
+            user_id: user?.id || null,
+            created_at: message.timestamp.toISOString()
+          });
+      } catch (error) {
+        console.error("Error saving message to database:", error);
+      }
+    };
+    
+    // Save the most recent message if it's not the initial one
+    const lastMessage = messages[messages.length - 1];
+    if (messages.length > 1) {
+      saveMessageToDb(lastMessage);
+    }
+  }, [messages, chatbotId, user]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,7 +95,8 @@ const ChatInterface = ({ title = "LawLink Legal Assistant" }: ChatInterfaceProps
       const { data, error } = await supabase.functions.invoke('legal-chat', {
         body: {
           message: userMessage.content,
-          chatHistory: chatHistory
+          chatHistory: chatHistory,
+          chatbotId: chatbotId // Pass the chatbot ID to the function
         }
       });
 
@@ -112,7 +145,7 @@ const ChatInterface = ({ title = "LawLink Legal Assistant" }: ChatInterfaceProps
     
     setMessages([{ 
       role: 'bot', 
-      content: "Hello! I'm the LawLink Legal Assistant. How can I help you today?",
+      content: "Hello! I'm the Awan LLM Legal Assistant. How can I help you today?",
       timestamp: new Date()
     }]);
   };
@@ -189,7 +222,7 @@ const ChatInterface = ({ title = "LawLink Legal Assistant" }: ChatInterfaceProps
                 }`}>
                   <div className="flex items-center mb-1">
                     <span className="text-xs font-medium">
-                      {message.role === 'user' ? 'You' : 'LawLink Assistant'}
+                      {message.role === 'user' ? 'You' : 'Awan LLM'}
                     </span>
                     <span className="text-xs ml-2 opacity-70">
                       {formatTime(message.timestamp)}
@@ -211,7 +244,7 @@ const ChatInterface = ({ title = "LawLink Legal Assistant" }: ChatInterfaceProps
                 
                 <div className="rounded-lg p-4 bg-muted rounded-tl-none">
                   <div className="flex items-center mb-1">
-                    <span className="text-xs font-medium">LawLink Assistant</span>
+                    <span className="text-xs font-medium">Awan LLM</span>
                     <span className="text-xs ml-2 opacity-70">{formatTime(new Date())}</span>
                   </div>
                   <div className="flex space-x-1 items-center h-5">
@@ -271,7 +304,7 @@ const ChatInterface = ({ title = "LawLink Legal Assistant" }: ChatInterfaceProps
         </form>
         
         <div className="mt-2 text-xs text-center text-muted-foreground">
-          LawLink Assistant provides general information only, not legal advice. Always consult with a qualified lawyer for your specific situation.
+          Awan LLM provides general information only, not legal advice. Always consult with a qualified lawyer for your specific situation.
         </div>
       </div>
     </div>

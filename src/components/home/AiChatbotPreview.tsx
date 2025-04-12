@@ -8,7 +8,7 @@ const AiChatbotPreview = () => {
   const [messages, setMessages] = useState([
     { 
       role: 'bot', 
-      content: 'Hello! I am JurisAI, your legal assistant. How can I help you today?' 
+      content: 'Hello! I am Awan LLM, your legal assistant. How can I help you today?' 
     }
   ]);
   const [inputValue, setInputValue] = useState('');
@@ -60,7 +60,7 @@ const AiChatbotPreview = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center max-w-3xl mx-auto mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            <span className="gradient-text">AI Legal Assistant</span>
+            <span className="gradient-text">Awan LLM Legal Assistant</span>
           </h2>
           <p className="text-muted-foreground text-lg">
             Get instant answers to common legal questions with our AI-powered assistant.
@@ -112,7 +112,7 @@ const AiChatbotPreview = () => {
           <div className="bg-card rounded-lg border shadow-lg overflow-hidden">
             <div className="bg-gradient-legal p-4 flex items-center">
               <Bot className="h-6 w-6 text-white" />
-              <h3 className="text-lg font-medium ml-2 text-white">JurisAI Assistant</h3>
+              <h3 className="text-lg font-medium ml-2 text-white">Awan LLM Assistant</h3>
             </div>
             <div className="h-96 flex flex-col">
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -130,7 +130,7 @@ const AiChatbotPreview = () => {
                         {message.role === 'bot' ? (
                           <>
                             <Bot className="h-4 w-4 mr-1" />
-                            <span className="text-xs font-medium">JurisAI</span>
+                            <span className="text-xs font-medium">Awan LLM</span>
                           </>
                         ) : (
                           <>
@@ -148,7 +148,7 @@ const AiChatbotPreview = () => {
                     <div className="bg-muted rounded-lg p-3 rounded-bl-none max-w-[80%]">
                       <div className="flex items-center mb-1">
                         <Bot className="h-4 w-4 mr-1" />
-                        <span className="text-xs font-medium">JurisAI</span>
+                        <span className="text-xs font-medium">Awan LLM</span>
                       </div>
                       <div className="flex space-x-1">
                         <div className="h-2 w-2 rounded-full bg-gray-400 animate-pulse"></div>

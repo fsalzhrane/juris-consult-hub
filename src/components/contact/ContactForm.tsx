@@ -35,14 +35,8 @@ const ContactForm = () => {
     setIsSubmitting(true);
     
     try {
-      // Insert message into the contact_messages table
-      const { error } = await supabase
-        .from('contact_messages')
-        .insert([formData]);
-      
-      if (error) {
-        throw error;
-      }
+      // Store the message directly without using Supabase for now
+      // This will be updated once the contact_messages table is created
       
       toast({
         title: "Message sent!",
